@@ -1,0 +1,6 @@
+{
+  "bibliospotter_url" : {
+    "parse" : "http://biblio.globalnames.org/parser.json?q=",
+    "train" : "http://biblio.globalnames.org/train.json"
+  }
+}

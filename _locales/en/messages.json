@@ -1,0 +1,32 @@
+{
+  "manifest_description" : {
+    "message" : "Find single biblio citations using the context menu."
+  },
+  "context_search" : {
+    "message" : "Find biblio document"
+  },
+  "invalid" : {
+    "message" : "That selection did not appear to be a citation."
+  },
+  "request_timeout" : {
+    "message" : "The BiblioSpotter service is currently unavailable."
+  },
+  "status" : {
+    "message" : "Looking for citation..."
+  },
+  "modal_header" : {
+    "message" : "Help teach BiblioSpotter by adding, removing, or adjusting tags."
+  },
+  "modal_submit" : {
+    "message" : "Submit"
+  },
+  "modal_reset" : {
+    "message" : "Clear"
+  },
+  "modal_failure" : {
+    "message" : "Sorry, something went wrong and BiblioSpotter did not receive your tagged citation."
+  },
+  "modal_retry" : {
+    "message" : "Retrying..."
+  }
+}
