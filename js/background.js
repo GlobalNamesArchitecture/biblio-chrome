@@ -17,10 +17,7 @@ chrome.config = (function() {
 
 $(function() {
 
-  var bs = {
-    sources  : ["crossref", "bhl", "biostor"],
-    citation : ""
-  };
+  var bs = { "citation" : "" };
 
   bs.createContexts = function() {
     var self = this, parent;
@@ -31,31 +28,6 @@ $(function() {
       "onclick"  : self.selectionClick
     });
 
-  };
-
-  bs.addListener = function() {
-    var self = this;
-
-    chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
-      if (request.method === "bs_tagged_citation") {
-        $.ajax({
-          type     : 'POST',
-          url      : chrome.config.bibliospotter_url.train,
-          async    : false,
-          data     : { tagged : request.data },
-          success  : function(response) {
-            sendResponse(response);
-          },
-          error    : function() {
-            sendResponse(response);
-          }
-        });
-      } else if (request.method === "bs_repeat_request") {
-        self.repeatRequest(request.data);
-      } else {
-        sendResponse({}); // snub them.
-      }
-    });
   };
 
   bs.verifyStructure = function(selection) {
@@ -80,106 +52,33 @@ $(function() {
     self.makeRequest();
   };
 
-  bs.trainClick = function(info, tab) {
-    tab = null;
-    var self = bs;
-
-    self.citation = info.selectionText;
-    self.failedRequest(false);
-  };
-
   bs.makeRequest = function() {
-    var self = bs, sources = "", identifiers = false, title = false, author = false, date_parts = false, tagged = false, response_url = "";
-
-    $.each(self.sources, function() {
-      sources += "&amp;sources[" + this + "]=true";
-    });
-
-    self.startParseMessage();
+    var self = bs, doi = "";
 
     $.ajax({
-      type : 'GET',
-      url  : chrome.config.bibliospotter_url.parse + encodeURIComponent(self.citation) + sources,
-      timeout : 10000,
-      async : false,
-      success : function(data) {
-
-        if(data.records[0].status === "success") {
-          identifiers = (data.records[0]["identifiers"] !== undefined) ? data.records[0]["identifiers"] : false;
-          title       = (data.records[0]["title"] !== undefined) ? data.records[0]["title"] : false;
-          author      = (data.records[0]["author"][0]["family"] !== undefined) ? data.records[0]["author"][0]["family"] : false;
-          date_parts  = (data.records[0]["issued"]["date-parts"][0] !== undefined) ? data.records[0]["issued"]["date-parts"][0] : false;
+      type     : 'POST',
+      url      : chrome.config.crossref_api,
+      contentType : "application/json; charset=utf-8",
+      dataType : 'json',
+      data     : JSON.stringify([ self.citation ]),
+      timeout  : 10000,
+      success  : function(data) {
+        if(data.results && data.results.length > 0) {
+          $.each(data.results, function() {
+            if (this.doi) { chrome.tabs.create({'url': 'http://dx.doi.org/' + this.doi}); }
+          });
         }
-
-        tagged = (data.records[0].tagged !== undefined) ? data.records[0].tagged : false;
-
-        if(title && author && date_parts && date_parts.length > 0) {
-          if (identifiers && identifiers.length > 0) {
-            $.each(identifiers, function(i,v) {
-              i = null;
-              if(v.type === "doi") {
-                response_url = "http://dx.doi.org/" + v.id;
-              } else if (v.type === "bhl") {
-                response_url = v.id;
-              } else if (v.type === "biostor") {
-                response_url = v.id;
-              }
-              return false;
-            });
-         } else {
-           response_url = "http://scholar.google.com/scholar?q="+encodeURIComponent(title);
-         }
-
-         self.endParseMessage();
-         chrome.tabs.create({'url': response_url});
-
-       } else {
-         self.endParseMessage();
-         self.failedRequest(tagged);
-       }
-     },
-     error : function() {
-       self.citation = "";
-       self.endParseMessage();
-       alert(chrome.i18n.getMessage("request_timeout"));
-     }
+      },
+      error    : function() {
+        self.citation = "";
+        alert(chrome.i18n.getMessage("request_timeout"));
+      }
    });
 
   };
 
-  bs.failedRequest = function(tagged) {
-    var self = this;
-
-    chrome.tabs.query({active : true, currentWindow : true}, function(tab) {
-      tab = tab[0];
-      chrome.tabs.sendMessage(tab.id, { method : "bs_failed_parse", data : tagged, citation : self.citation }, function(response) {
-        self.citation = "";
-      });
-    });
-  };
-
-  bs.startParseMessage = function() {
-    chrome.tabs.query({active : true, currentWindow : true}, function(tab) {
-      tab = tab[0];
-      chrome.tabs.sendMessage(tab.id, { method : "bs_start_parse" });
-    });
-  };
-
-  bs.endParseMessage = function() {
-    chrome.tabs.query({active : true, currentWindow : true}, function(tab) {
-      tab = tab[0];
-      chrome.tabs.sendMessage(tab.id, { method : "bs_end_parse" });
-    });
-  };
-
-  bs.repeatRequest = function(citation) {
-    this.citation = citation;
-    this.makeRequest();
-  };
-
   bs.init = function() {
     this.createContexts();
-    this.addListener();
   };
 
   bs.init();
