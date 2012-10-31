@@ -19,6 +19,10 @@ $(function() {
 
   var bs = { "citation" : "" };
 
+  bs.trackEvent = function(category, action) {
+    if (window._gaq !== undefined) { _gaq.push(['_trackEvent', category, action]); }
+  };
+
   bs.createContexts = function() {
     var self = this, parent;
 
@@ -43,6 +47,8 @@ $(function() {
     tab = null;
     var self = bs;
 
+    self.trackEvent("search", "launch");
+
     if(!self.verifyStructure(info.selectionText)) {
       alert(chrome.i18n.getMessage("invalid"));
       return false;
@@ -63,15 +69,24 @@ $(function() {
       data     : JSON.stringify([ self.citation ]),
       timeout  : 10000,
       success  : function(data) {
-        if(data.results && data.results.length > 0) {
+        if(data.hasOwnProperty('results') && data.results.length > 0) {
           $.each(data.results, function() {
-            if (this.doi) { chrome.tabs.create({'url': 'http://dx.doi.org/' + this.doi}); }
+            if (this.hasOwnProperty('doi') && this.hasOwnProperty('score') && this.score > 4.5) {
+              chrome.tabs.create({'url': 'http://dx.doi.org/' + this.doi});
+              self.trackEvent("search", "found");
+            } else {
+              alert(chrome.i18n.getMessage("not_found"));
+              self.trackEvent("search", "not found");
+            }
           });
+        } else {
+          alert(chrome.i18n.getMessage("not_found"));
         }
       },
       error    : function() {
         self.citation = "";
         alert(chrome.i18n.getMessage("request_timeout"));
+        self.trackEvent("search", "timeout");
       }
    });
 

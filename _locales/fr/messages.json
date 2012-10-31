@@ -8,6 +8,9 @@
   "invalid" : {
     "message" : "Cette sélection ne semble pas être une citation."
   },
+  "not_found" : {
+    "message" : "Désolé, rien n'a été trouvé."
+  },
   "request_timeout" : {
     "message" : "Le service CrossRef est actuellement indisponible."
   }
