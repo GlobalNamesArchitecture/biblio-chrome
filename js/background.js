@@ -36,7 +36,7 @@ $(function() {
 
   bs.verifyStructure = function(selection) {
     var valid_pattern = new RegExp('^(?=.*[A-Z]){3,}(?=.*\d){4,}.+$');
-    if(selection.length < 15) { return false; }
+    if(selection.length <= chrome.config.min_citation_length) { return false; }
     if(!selection.match(valid_pattern)) {
       return false;
     }

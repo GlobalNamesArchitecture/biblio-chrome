@@ -1,6 +1,6 @@
 {
   "name"            : "BiblioSpotter",
-  "version"         : "1.7",
+  "version"         : "1.8",
   "description"     : "__MSG_manifest_description__",
   "minimum_chrome_version" : "18",
   "manifest_version" : 2,
