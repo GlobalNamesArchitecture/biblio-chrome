@@ -72,7 +72,7 @@ $(function() {
         if(data.hasOwnProperty('results') && data.results.length > 0) {
           $.each(data.results, function() {
             if (this.hasOwnProperty('doi') && this.hasOwnProperty('score') && this.score > 4.5) {
-              chrome.tabs.create({'url': 'http://dx.doi.org/' + this.doi});
+              chrome.tabs.create({'url': this.doi});
               self.trackEvent("search", "found");
             } else {
               alert(chrome.i18n.getMessage("not_found"));
