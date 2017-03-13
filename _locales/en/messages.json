@@ -1,9 +1,9 @@
 {
   "manifest_description" : {
-    "message" : "Find single biblio citations using the context menu."
+    "message" : "Find single citations using the context menu."
   },
   "context_search" : {
-    "message" : "Find biblio document"
+    "message" : "Crossref search"
   },
   "invalid" : {
     "message" : "That selection did not appear to be a citation."
@@ -12,6 +12,6 @@
     "message" : "Sorry, nothing was found."
   },
   "request_timeout" : {
-    "message" : "The CrossRef service is currently unavailable."
+    "message" : "The Crossref service is currently unavailable."
   }
 }

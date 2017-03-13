@@ -1,5 +1,5 @@
 {
-  "name"            : "BiblioSpotter",
+  "name"            : "Crossref Search",
   "version"         : "2.0",
   "description"     : "__MSG_manifest_description__",
   "minimum_chrome_version" : "18",
@@ -14,5 +14,5 @@
   },
   "default_locale" : "en",
   "permissions": ["tabs", "contextMenus", "<all_urls>", "background"],
-  "content_security_policy" : "script-src 'self' https://ssl.google-analytics.com; object-src 'self'"
+  "content_security_policy" : "script-src 'self'; object-src 'self'"
 }

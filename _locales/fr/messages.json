@@ -1,9 +1,9 @@
 {
   "manifest_description" : {
-    "message" : "Trouver des références bibliographiques en utilisant le menu contextuel."
+    "message" : "Trouver une référence bibliographique en utilisant le menu contextuel."
   },
   "context_search" : {
-    "message" : "Trouver le document biblio"
+    "message" : "Recherche Crossref"
   },
   "invalid" : {
     "message" : "Cette sélection ne semble pas être une citation."
@@ -12,6 +12,6 @@
     "message" : "Désolé, rien n'a été trouvé."
   },
   "request_timeout" : {
-    "message" : "Le service CrossRef est actuellement indisponible."
+    "message" : "Le service Crossref est actuellement indisponible."
   }
 }

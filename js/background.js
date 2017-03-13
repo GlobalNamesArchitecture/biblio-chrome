@@ -1,4 +1,4 @@
-/*global jQuery, window, document, self, chrome, console, _gaq */
+/*global chrome, Object, alert */
 chrome.config = (function() {
 
   "use strict";
@@ -6,9 +6,11 @@ chrome.config = (function() {
   var configObject = false, xhr = new XMLHttpRequest();
 
   xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4) { configObject = JSON.parse(xhr.responseText); }
+    if (xhr.readyState === 4) {
+      configObject = JSON.parse(xhr.responseText);
+    }
   };
-  xhr.open("GET", chrome.extension.getURL("/config.json"), false);
+  xhr.open("GET", chrome.runtime.getURL("/config.json"), false);
 
   try {
     xhr.send();
@@ -17,19 +19,16 @@ chrome.config = (function() {
   }
 
   return configObject;
+
 })();
 
-var BiblioChrome = (function($, window, document) {
+var CrossrefSearch = (function() {
 
   "use strict";
 
   var _private = {
 
     citation: "",
-
-    trackEvent: function(category, action) {
-      if (window._gaq !== undefined) { _gaq.push(["_trackEvent", category, action]); }
-    },
 
     createContexts: function() {
       chrome.contextMenus.create({
@@ -41,7 +40,9 @@ var BiblioChrome = (function($, window, document) {
 
     verifyStructure: function(selection) {
       var valid_pattern = new RegExp('^(?=.*[A-Z]){3,}(?=.*\d){4,}.+$');
-      if(selection.length <= chrome.config.min_citation_length) { return false; }
+      if(selection.length <= chrome.config.min_citation_length) {
+        return false;
+      }
       if(!selection.match(valid_pattern)) {
         return false;
       }
@@ -49,7 +50,6 @@ var BiblioChrome = (function($, window, document) {
     },
 
     selectionClick: function(info) {
-      this.trackEvent("search", "launch");
       if(!this.verifyStructure(info.selectionText)) {
         alert(chrome.i18n.getMessage("invalid"));
         return false;
@@ -59,52 +59,46 @@ var BiblioChrome = (function($, window, document) {
     },
 
     makeRequest: function() {
-      var self = this, doi = "";
+      var self = this, xhr = new XMLHttpRequest(), data = "", dois = "";
 
-      $.ajax({
-        type     : "POST",
-        url      : chrome.config.crossref_api,
-        contentType : "application/json; charset=utf-8",
-        dataType : "json",
-        data     : JSON.stringify([ this.citation ]),
-        timeout  : 10000,
-        success  : function(data) {
-          if(data.hasOwnProperty("results") && data.results.length > 0) {
-            self.sendWebHook(data);
-            $.each(data.results, function() {
-              if (this.hasOwnProperty("doi") && this.hasOwnProperty("score") && this.score > 4.5) {
-                chrome.tabs.create({"url": this.doi});
-                self.trackEvent("search", "found");
-              } else {
-                alert(chrome.i18n.getMessage("not_found"));
-                self.trackEvent("search", "not found");
+      xhr.open("POST", chrome.config.crossref_api);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) { 
+          data = JSON.parse(xhr.responseText);
+          if (data.hasOwnProperty("results") && data.results.length > 0) {
+            dois = Object.keys(data.results).map(function(index) {
+              if (data.results[index].hasOwnProperty("doi") && 
+                  data.results[index].hasOwnProperty("score") && 
+                  data.results[index].score > 4.5) {
+                    return data.results[index].doi;
               }
             });
-          } else {
-            alert(chrome.i18n.getMessage("not_found"));
           }
-        },
-        error    : function() {
-          self.citation = "";
-          alert(chrome.i18n.getMessage("request_timeout"));
-          self.trackEvent("search", "timeout");
+          if (dois.length === 0) {
+            alert(chrome.i18n.getMessage("not_found"));
+          } else {
+            for(var i in dois) {
+              chrome.tabs.create({"url": dois[i]});
+            }
+          }
         }
-      });
-    },
-
-    sendWebHook: function(message) {
-      chrome.tabs.query({active : true, currentWindow : true}, function(tab) {
-        tab = tab[0];
-        alert(tab.id);
-      });
-    },
-
-    init: function() {
-      this.createContexts();
+      };
+      try {
+        xhr.send(JSON.stringify([ this.citation ]));
+      } catch(e) {
+        self.citation = "";
+        alert(chrome.i18n.getMessage("request_timeout"));
+      }
     }
 
   };
+  
+  return {
+    init: function() {
+      _private.createContexts();
+    }
+  };
 
-  _private.init();
+}());
 
-}(jQuery, window, document));
+CrossrefSearch.init();
