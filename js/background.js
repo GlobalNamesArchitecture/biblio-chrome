@@ -38,23 +38,36 @@ var CrossrefSearch = (function() {
       });
     },
 
-    verifyStructure: function(selection) {
+    verifyStructure: function() {
       var valid_pattern = new RegExp('^(?=.*[A-Z]){3,}(?=.*\d){4,}.+$');
-      if(selection.length <= chrome.config.min_citation_length) {
+      if(this.citation.length <= chrome.config.min_citation_length) {
         return false;
       }
-      if(!selection.match(valid_pattern)) {
+      if(!this.citation.match(valid_pattern)) {
         return false;
       }
       return true;
     },
 
+    containedDOI: function() {
+      var doi_pattern = new RegExp('(?:(10[.][0-9]{4,}(?:[.][0-9]+)*/(?:(?![%"#? ])\\S)+))', 'g');
+      return this.citation.match(doi_pattern);
+    },
+
     selectionClick: function(info) {
-      if(!this.verifyStructure(info.selectionText)) {
+      this.citation = info.selectionText;
+      var contained_doi = this.containedDOI();
+
+      if(!this.verifyStructure()) {
         alert(chrome.i18n.getMessage("invalid"));
         return false;
       }
-      this.citation = info.selectionText;
+      if(contained_doi && contained_doi.length > 0) {
+        for (var i = 0; i < contained_doi.length; i++) {
+          chrome.tabs.create({"url": "https://doi.org/" + contained_doi[i]});
+        }
+        return false;
+      }
       this.makeRequest();
     },
 

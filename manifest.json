@@ -1,6 +1,6 @@
 {
   "name"            : "Crossref Search",
-  "version"         : "2.0",
+  "version"         : "2.1",
   "description"     : "__MSG_manifest_description__",
   "minimum_chrome_version" : "18",
   "manifest_version" : 2,
