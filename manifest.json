@@ -1,6 +1,6 @@
 {
   "name"            : "Crossref Search",
-  "version"         : "2.1",
+  "version"         : "2.2",
   "description"     : "__MSG_manifest_description__",
   "minimum_chrome_version" : "18",
   "manifest_version" : 2,
@@ -13,6 +13,6 @@
     "128" : "images/icon-128.png"
   },
   "default_locale" : "en",
-  "permissions": ["tabs", "contextMenus", "<all_urls>", "background"],
+  "permissions": ["contextMenus"],
   "content_security_policy" : "script-src 'self'; object-src 'self'"
 }
