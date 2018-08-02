@@ -1,4 +1,4 @@
 {
-  "crossref_api" : "http://search.crossref.org/links",
+  "crossref_api" : "https://search.crossref.org/links",
   "min_citation_length" : 10
 }
