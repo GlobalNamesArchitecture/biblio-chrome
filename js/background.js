@@ -1,27 +1,3 @@
-/*global chrome, Object, alert */
-chrome.config = (function() {
-
-  "use strict";
-
-  var configObject = false, xhr = new XMLHttpRequest();
-
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4) {
-      configObject = JSON.parse(xhr.responseText);
-    }
-  };
-  xhr.open("GET", chrome.runtime.getURL("/config.json"), false);
-
-  try {
-    xhr.send();
-  } catch(e) {
-    console.log("Couldn't load manifest.json");
-  }
-
-  return configObject;
-
-})();
-
 var CrossrefSearch = (function() {
 
   "use strict";
@@ -40,7 +16,7 @@ var CrossrefSearch = (function() {
 
     verifyStructure: function() {
       var valid_pattern = new RegExp('^(?=.*[A-Z]){3,}(?=.*\d){4,}.+$');
-      if(this.citation.length <= chrome.config.min_citation_length) {
+      if(this.citation.length <= 10) {
         return false;
       }
       if(!this.citation.match(valid_pattern)) {
@@ -72,9 +48,9 @@ var CrossrefSearch = (function() {
     },
 
     makeRequest: function() {
-      var self = this, xhr = new XMLHttpRequest(), data = "", dois = "";
+      var self = this, xhr = new XMLHttpRequest(), data = "", dois = [];
 
-      xhr.open("POST", chrome.config.crossref_api);
+      xhr.open("POST", "https://search.crossref.org/links");
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) { 
           data = JSON.parse(xhr.responseText);
@@ -87,7 +63,8 @@ var CrossrefSearch = (function() {
               }
             });
           }
-          if (dois.length === 0) {
+          dois = dois.filter(function (el) { return el != null; });
+          if (!Array.isArray(dois) || !dois.length) {
             alert(chrome.i18n.getMessage("not_found"));
           } else {
             for(var i in dois) {
